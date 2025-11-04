@@ -42,13 +42,32 @@ def duplicate_game_asset(asset_to_duplicate):
 
     return unique_name
 
+def get_unique_minimized_path(base_path: str) -> str:
+    """
+    Given a base file path (without extension),
+    returns a unique path ending with '_minimized.tga' or '_minimized_X.tga' if duplicates exist.
+    """
+    directory = os.path.dirname(base_path)
+    filename = os.path.basename(base_path)
+    name, _ = os.path.splitext(filename)
+
+    # First candidate
+    candidate = os.path.join(directory, f"{name}_minimized.tga")
+
+    counter = 1
+    while os.path.exists(candidate):
+        candidate = os.path.join(directory, f"{name}_minimized_{counter}.tga")
+        counter += 1
+
+    return candidate
+
 def main():
     asset_path = sys.argv[2]
     in_path = sys.argv[1]
     base, ext = os.path.splitext(in_path)
     out_path = base + ".tga"
     if sys.argv[4] == "F":
-        out_path = base + "_minimized.tga"
+        out_path = get_unique_minimized_path(base)
 
     w, h, bpp, has_alpha, data = TGAHelpers.read_tga(in_path)
     print(f"Read {in_path}: {w}×{h}, {bpp}-bit, alpha={has_alpha}")
